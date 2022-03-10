@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  scrum-postgres:
+    image: "postgres:9.6-alpine"
+    container_name: scrum-postgres
+    #Volume mounted for database for the storage
+    volumes:
+      - scrum-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432 
+
+    environment:
+      - POSTGRES_DB=talandb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+
+  scrum-app:
+    build: ./scrum-app
+    container_name: scrum-app
+
+    environment:
+      - DB_SERVER=scrum-postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://scrum-postgres/talandb
+      - POSTGRES_DB=talandb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - 51954:8080 
+    links:
+      - scrum-postgres
+
+  scrum-ui:
+    build: ./scrum-ui
+    container_name: scrum-ui
+    ports:
+      - 4200:80
+    links:
+      - scrum-app
+
+#Volumes for DB data
+volumes:
+  scrum-data:
